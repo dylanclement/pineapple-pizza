@@ -60,5 +60,45 @@ namespace PineapplePizza
                 throw;
             }
         }
+
+        public async Task WriteObjectDataAsync(string objectKeyName, byte[] data) 
+        {
+            try
+            {
+                // simple object put
+                PutObjectRequest request = new PutObjectRequest()
+                {
+                    ContentBody = "this is a test",
+                    BucketName = _s3BucketName,
+                    Key = objectKeyName
+                };
+
+                PutObjectResponse response = await _client.PutObjectAsync(request);
+
+                // put a more complex object with some metadata and http headers.
+                PutObjectRequest titledRequest = new PutObjectRequest()
+                {
+                    BucketName = _s3BucketName,
+                    Key = objectKeyName
+                };
+                titledRequest.Metadata.Add("title", "the title");
+
+                await _client.PutObjectAsync(titledRequest);
+            }
+            catch (AmazonS3Exception amazonS3Exception)
+            {
+                if (amazonS3Exception.ErrorCode != null &&
+                    (amazonS3Exception.ErrorCode.Equals("InvalidAccessKeyId") ||
+                    amazonS3Exception.ErrorCode.Equals("InvalidSecurity")))
+                {
+                    Console.WriteLine("Please check the provided AWS Credentials.");
+                    Console.WriteLine("If you haven't signed up for Amazon S3, please visit http://aws.amazon.com/s3");
+                }
+                else
+                {
+                    Console.WriteLine("An error occurred with the message '{0}' when writing an object", amazonS3Exception.Message);
+                }
+            }    
+        }
     }
 }

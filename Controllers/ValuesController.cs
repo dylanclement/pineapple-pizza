@@ -38,7 +38,8 @@ namespace PineapplePizza.Controllers
                 byte[] bytes = Convert.FromBase64String(fileBase64);
 
                 // TODO: Save to S3
-                System.IO.File.WriteAllBytes("test.jpg", bytes);
+                //System.IO.File.WriteAllBytes("test.jpg", bytes);
+                await _s3Connector.WriteObjectDataAsync("test", bytes);
             }
         }
 
