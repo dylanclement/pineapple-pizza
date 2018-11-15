@@ -10,11 +10,6 @@ using PineapplePizza.Model;
 
 namespace PineapplePizza.Controllers
 {
-    public class Model 
-    {
-        public string imageFile;
-    }
-
     [Route("api/[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
@@ -32,16 +27,16 @@ namespace PineapplePizza.Controllers
 
         // POST api/values
         [HttpPost]
-        public async void Post()
+        public async Task<IActionResult> Post()
         {
             using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
             {  
                 var fileBase64 = await reader.ReadToEndAsync();
                 byte[] bytes = Convert.FromBase64String(fileBase64);
 
-                // TODO: Save to S3
-                //System.IO.File.WriteAllBytes("test.jpg", bytes);
-                await _s3Connector.WriteObjectDataAsync("test", bytes);
+                var picName = Guid.NewGuid().ToString("D");
+                await _s3Connector.WriteObjectDataAsync(picName, bytes);
+                return Ok();
             }
         }
 

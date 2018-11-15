@@ -29,7 +29,9 @@
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 error: function(msg) {
-                    alert('Error saving image. ' + JSON.stringify(msg));
+                    if (image.status != 200) {
+                        alert('Error saving image. ' + JSON.stringify(msg));
+                    }
                 },
                 success: function(msg) {
                     alert('Image saved successfully !');

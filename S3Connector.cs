@@ -61,29 +61,20 @@ namespace PineapplePizza
             }
         }
 
-        public async Task WriteObjectDataAsync(string objectKeyName, byte[] data) 
+        public async Task WriteObjectDataAsync(string objectKeyName, byte[] data, string contentType = "image/jpeg") 
         {
             try
             {
                 // simple object put
                 PutObjectRequest request = new PutObjectRequest()
                 {
-                    ContentBody = "this is a test",
+                    InputStream = new MemoryStream(data),
+                    ContentType = contentType,
                     BucketName = _s3BucketName,
                     Key = objectKeyName
                 };
 
                 PutObjectResponse response = await _client.PutObjectAsync(request);
-
-                // put a more complex object with some metadata and http headers.
-                PutObjectRequest titledRequest = new PutObjectRequest()
-                {
-                    BucketName = _s3BucketName,
-                    Key = objectKeyName
-                };
-                titledRequest.Metadata.Add("title", "the title");
-
-                await _client.PutObjectAsync(titledRequest);
             }
             catch (AmazonS3Exception amazonS3Exception)
             {
