@@ -31,12 +31,22 @@ namespace PineapplePizza.Controllers
         {
             using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
             {  
+                // Fetch file content fomr base64 encoded body
                 var fileBase64 = await reader.ReadToEndAsync();
                 byte[] bytes = Convert.FromBase64String(fileBase64);
 
+                // Assign S3 object name and save to S3
                 var picName = Guid.NewGuid().ToString("D");
                 await _s3Connector.WriteObjectDataAsync(picName, bytes);
-                return Ok();
+
+                // Return the response to the UI
+                var response = new MatchResponse 
+                {
+                    // TODO! Fetch values from rekognition
+                    StatusCode = 200,
+                    MatchConfidence = 92.39f
+                };
+                return Ok(response);
             }
         }
 

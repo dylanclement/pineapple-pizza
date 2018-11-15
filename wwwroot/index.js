@@ -1,3 +1,4 @@
+
 const player = document.getElementById('player');
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
@@ -28,7 +29,25 @@ $.ajax({
             }
         },
         success: function(msg) {
-            alert('Image saved successfully !');
+            // Display results
+            resultDiv = document.getElementById('results')
+            resultDiv.style.display = ''
+
+            if (msg.statusCode == 200) {
+                var resultText = document.getElementById('result-text')
+                resultText.innerHTML = "Result: Success"
+                resultText.style = "color:green"
+            } else {
+                var resultText = document.getElementById('result-text')
+                resultText.innerHTML = "Result: Sorry"
+                resultText.style = "color:red"
+            }
+            document.getElementById('result-confidence').innerHTML = "Confidence: " + msg.matchConfidence
+            if (msg.message !== null) {
+                document.getElementById('result-message').innerHTML = "Message: " + msg.message
+
+            }
+            console.log('Image saved successfully !')
         }
     });
 });
