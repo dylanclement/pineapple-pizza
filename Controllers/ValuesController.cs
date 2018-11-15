@@ -6,8 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PineapplePizza.Model;
 
-namespace pineapple_pizza.Controllers
+namespace PineapplePizza.Controllers
 {
     public class Model 
     {
@@ -18,18 +19,13 @@ namespace pineapple_pizza.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        // GET api/values
-        [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        S3Connector _s3Connector;
+        DynamoDBConnector _dynamoDBConnector;
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
+        public ValuesController(S3Connector s3connector, DynamoDBConnector dynamoDBConnector)
         {
-            return "value";
+            _s3Connector = s3connector;
+            _dynamoDBConnector = dynamoDBConnector;
         }
 
         // POST api/values
@@ -44,21 +40,15 @@ namespace pineapple_pizza.Controllers
                 // TODO: Save to S3
                 System.IO.File.WriteAllBytes("test.jpg", bytes);
             }
-
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+
+        // GET api/values
+        [HttpGet]
+        public async Task<IActionResult> Get()
         {
+            return Ok(await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId("BrunoTagliapietra", 9638)));
+            //return Ok(await _connector.ReadObjectDataAsync("mytextfile.txt"));
         }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
-
-
     }
 }
