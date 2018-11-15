@@ -23,20 +23,9 @@ namespace PineapplePizza.Model
             Number = number;
         }
 
-        public Dictionary<string, AttributeValue> ToDynamoDB()
-        {
-            return new Dictionary<string, AttributeValue>()
-            {
-                {
-                    "EmployeeId",
-                    new AttributeValue { S = ToString() }
-                }
-            };
-        }
-
         public override string ToString()
         {
-            return Number + Name;
+            return Number + "-" + Name;
         }
 
         public override int GetHashCode()

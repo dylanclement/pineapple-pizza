@@ -47,8 +47,10 @@ namespace PineapplePizza.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Ok(await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId("BrunoTagliapietra", 9638)));
-            //return Ok(await _connector.ReadObjectDataAsync("mytextfile.txt"));
+            return Ok(
+                await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId("BrunoTagliapietra", 9638)) +
+                await _s3Connector.ReadObjectDataAsync("mytextfile.txt")
+                );
         }
     }
 }
