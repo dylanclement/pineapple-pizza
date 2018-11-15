@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Amazon.S3;
 using Amazon;
 using PineapplePizza.Config;
+using Amazon.DynamoDBv2;
 
 namespace PineapplePizza
 {
@@ -38,9 +39,12 @@ namespace PineapplePizza
             services.AddOptions();
             services.Configure<AppConfig>(Configuration.GetSection("AppConfig"));
 
-            services.AddTransient<S3Connector>();
             services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
             services.AddAWSService<IAmazonS3>();
+            services.AddAWSService<IAmazonDynamoDB>();
+
+            services.AddTransient<S3Connector>();
+            services.AddTransient<DynamoDBConnector>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

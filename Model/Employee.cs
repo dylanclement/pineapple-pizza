@@ -5,7 +5,13 @@ using System.Threading.Tasks;
 
 namespace PineapplePizza.Model
 {
-    public class Employee
+    public interface IEmployee
+    {
+        EmployeeId Id { get; }
+        IdCard ActiveIdCard { get; }
+    }
+
+    public class Employee: IEmployee
     {
         public EmployeeId Id { get; set; }
         public IdCard ActiveIdCard { get; set; }
