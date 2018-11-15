@@ -1,0 +1,11 @@
+body {
+    background: #eee;
+}
+
+#player {
+    margin: 10px;
+}
+
+#canvas {
+    margin: 10px;
+}
