@@ -21,11 +21,13 @@ namespace PineapplePizza.Controllers
     {
         S3Connector _s3Connector;
         DynamoDBConnector _dynamoDBConnector;
+        RekognitionConnector _rekognitionConnector;
 
-        public ValuesController(S3Connector s3connector, DynamoDBConnector dynamoDBConnector)
+        public ValuesController(S3Connector s3connector, DynamoDBConnector dynamoDBConnector, RekognitionConnector rekognitionConnector)
         {
             _s3Connector = s3connector;
             _dynamoDBConnector = dynamoDBConnector;
+            _rekognitionConnector = rekognitionConnector;
         }
 
         // POST api/values
@@ -49,8 +51,10 @@ namespace PineapplePizza.Controllers
         public async Task<IActionResult> Get()
         {
             return Ok(
-                await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId("BrunoTagliapietra", 9638)) +
-                await _s3Connector.ReadObjectDataAsync("mytextfile.txt")
+                await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId("BrunoTagliapietra", 9638)) + "\n" +
+                await _s3Connector.ReadObjectDataAsync("mytextfile.txt") + "\n" +
+                await _rekognitionConnector.DetectFaceInS3Object("213a8517-f372-4328-96c3-2134ab4501a8") + "\n" +
+                await _rekognitionConnector.CompareFacesInS3Objects("213a8517-f372-4328-96c3-2134ab4501a8", "a4778861-d477-466f-b7f9-745475de81d8", 70)
                 );
         }
     }

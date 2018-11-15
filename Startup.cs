@@ -14,6 +14,7 @@ using Amazon.S3;
 using Amazon;
 using PineapplePizza.Config;
 using Amazon.DynamoDBv2;
+using Amazon.Rekognition;
 
 namespace PineapplePizza
 {
@@ -42,9 +43,11 @@ namespace PineapplePizza
             services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
             services.AddAWSService<IAmazonS3>();
             services.AddAWSService<IAmazonDynamoDB>();
+            services.AddAWSService<IAmazonRekognition>();
 
             services.AddTransient<S3Connector>();
             services.AddTransient<DynamoDBConnector>();
+            services.AddTransient<RekognitionConnector>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
