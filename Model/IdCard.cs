@@ -9,13 +9,13 @@ namespace PineapplePizza.Model
     {
         string Name { get; }
         int Number { get; }
-        Guid PictureObjectId { get; }
+        string PictureObjectId { get; }
     }
 
     public class IdCard
     {
         public string Name { get; set; }
         public int Number { get; set; }
-        public Guid PictureObjectId { get; set; }
+        public string PictureObjectId { get; set; }
     }
 }

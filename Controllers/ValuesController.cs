@@ -55,11 +55,25 @@ namespace PineapplePizza.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
+            //var cardPhotoId = "213a8517-f372-4328-96c3-2134ab4501a8";
+            var testPhotoId = "2ad44936-5441-4c00-89f3-9ec64e66d8e5";
+
+            const int minThresholdPercentage = 80;
+
+            //We extract the employee data from the id card
+            (int employeeNumber, string employeeNameWithoutSpaces) employeeData = await _rekognitionConnector.ExtractNameAndCodeInS3Object(testPhotoId);
+
+            var employee = await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId(employeeData.employeeNameWithoutSpaces, employeeData.employeeNumber));
+
+            //we ensure that the faces are legit.
+            await _rekognitionConnector.FindFaceOrThrowException(employee.ActiveIdCard.PictureObjectId, testPhotoId, minThresholdPercentage);
+
             return Ok(
-                await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId("BrunoTagliapietra", 9638)) + "\n" +
-                await _s3Connector.ReadObjectDataAsync("mytextfile.txt") + "\n" +
-                await _rekognitionConnector.DetectFaceInS3Object("213a8517-f372-4328-96c3-2134ab4501a8") + "\n" +
-                await _rekognitionConnector.CompareFacesInS3Objects("213a8517-f372-4328-96c3-2134ab4501a8", "a4778861-d477-466f-b7f9-745475de81d8", 70)
+                //await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId("BrunoTagliapietra", 9638)) + "\n" +
+                //await _s3Connector.ReadObjectDataAsync("mytextfile.txt") + "\n" +
+                //await _rekognitionConnector.DetectFaceInS3Object("213a8517-f372-4328-96c3-2134ab4501a8") + "\n" +
+                //await _rekognitionConnector.CompareFacesInS3Objects("213a8517-f372-4328-96c3-2134ab4501a8", "a4778861-d477-466f-b7f9-745475de81d8", 70) + "\n" +
+                //await _rekognitionConnector.DetectTextInS3Object("2ad44936-5441-4c00-89f3-9ec64e66d8e5") + "\n" +
                 );
         }
     }

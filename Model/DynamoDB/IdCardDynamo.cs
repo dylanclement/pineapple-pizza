@@ -15,7 +15,7 @@ namespace PineapplePizza.Model.DynamoDB
         {
             Name = poco.Name;
             Number = poco.Number;
-            PictureObjectId = poco.PictureObjectId.ToString("D");
+            PictureObjectId = poco.PictureObjectId;
         }
 
         public IdCard ToPoco()
@@ -24,7 +24,7 @@ namespace PineapplePizza.Model.DynamoDB
             {
                 Name = Name,
                 Number = Number,
-                PictureObjectId = Guid.Parse(PictureObjectId)
+                PictureObjectId = PictureObjectId
             };
         }
     }

@@ -6,6 +6,7 @@ using Amazon.Rekognition;
 using Amazon.Rekognition.Model;
 using Microsoft.Extensions.Options;
 using PineapplePizza.Config;
+using System.Text;
 
 namespace PineapplePizza
 {
@@ -58,10 +59,10 @@ namespace PineapplePizza
             }
         }
 
-        public async Task<float> CompareFacesInS3Objects(string s3ObjectSourceName, string s3ObjectTargetName, float similarityThreshold)
+        public async Task FindFaceOrThrowException(string s3ObjectIdCard, string s3ObjectPhotoToTest, float similarityThreshold)
         {
-            var imgSrc = GetImageDefinition(s3ObjectSourceName);
-            var imgTrg = GetImageDefinition(s3ObjectTargetName);
+            var imgSrc = GetImageDefinition(s3ObjectIdCard);
+            var imgTrg = GetImageDefinition(s3ObjectPhotoToTest);
 
             var compareFacesRequest = new CompareFacesRequest()
             {
@@ -74,22 +75,73 @@ namespace PineapplePizza
             {
                 var compareFacesResponse = await _client.CompareFacesAsync(compareFacesRequest);
 
-                // Display results
-                var match = compareFacesResponse.FaceMatches.SingleOrDefault();
-                if (match == null) return 0;
+                // we are looking for two faces, the card and the actual picture taken by the person.
+                var matchesWeCareAbout = compareFacesResponse.FaceMatches.OrderByDescending(m => m.Similarity).Take(2);
+
+                if (matchesWeCareAbout.Count() < 2) throw new Exception("Not enough faces");
+
+                // the card should be the smallest photo of the two with highest similarity
+                var shouldBeTheCardBySize = compareFacesResponse.FaceMatches.OrderBy(m => m.Face.BoundingBox.Height * m.Face.BoundingBox.Width).Take(1).Single();
+
+                // the card should also be the one with the highest similarity
+                var shouldBeTheCardBySimilarity = compareFacesResponse.FaceMatches.OrderByDescending(m => m.Similarity).Take(1).Single();
+
+                if (shouldBeTheCardBySimilarity != shouldBeTheCardBySize) throw new Exception("Faces don't match");
+
+                var match = shouldBeTheCardBySimilarity;
                 var face = match.Face;
                 var position = face.BoundingBox;
                 System.Diagnostics.Debug.WriteLine("Face at " + position.Left + " " + position.Top + " matches with " + face.Confidence + "% confidence.");
                 System.Diagnostics.Debug.WriteLine("There was " + compareFacesResponse.UnmatchedFaces.Count + " face(s) that did not match");
                 System.Diagnostics.Debug.WriteLine("Source image rotation: " + compareFacesResponse.SourceImageOrientationCorrection);
                 System.Diagnostics.Debug.WriteLine("Target image rotation: " + compareFacesResponse.TargetImageOrientationCorrection);
-
-                return face.Confidence;
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 throw;
+            }
+        }
+
+        public async Task<(int,string)> ExtractNameAndCodeInS3Object(string s3ObjectPhotoToTest)
+        {
+            var detectTextRequest = new DetectTextRequest()
+            {
+                Image = GetImageDefinition(s3ObjectPhotoToTest)
+            };
+
+            try
+            {
+                DetectTextResponse detectTextResponse = await _client.DetectTextAsync(detectTextRequest);
+                System.Diagnostics.Debug.WriteLine("Detected lines and words for " + s3ObjectPhotoToTest);
+                var uniqueStrings = new HashSet<string>();
+                foreach (TextDetection text in detectTextResponse.TextDetections)
+                {
+                    System.Diagnostics.Debug.WriteLine("Detected: " + text.DetectedText);
+                    System.Diagnostics.Debug.WriteLine("Confidence: " + text.Confidence);
+                    System.Diagnostics.Debug.WriteLine("Id : " + text.Id);
+                    System.Diagnostics.Debug.WriteLine("Parent Id: " + text.ParentId);
+                    System.Diagnostics.Debug.WriteLine("Type: " + text.Type);
+                }
+
+                var textWeCareAbout = detectTextResponse.TextDetections.Where(td => td.Confidence > 90);
+
+                var uniqueTexts = textWeCareAbout.Select(td => td.DetectedText).ToHashSet();
+
+                var probablyTheName = uniqueTexts.OrderByDescending(td => td.Length).Take(1).Single();
+                var probablyTheEmployeeNumber = uniqueTexts.SingleOrDefault(td => td.All(chr => Char.IsNumber(chr)));
+
+                if (probablyTheEmployeeNumber == null) throw new Exception("Couldn't read the employee number");
+
+                int employeeNumber = int.Parse(probablyTheEmployeeNumber);
+                string employeeNameWithoutSpaces = probablyTheName.Replace(" ", string.Empty);
+
+                return (employeeNumber, employeeNameWithoutSpaces);
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                throw e;
             }
         }
 
