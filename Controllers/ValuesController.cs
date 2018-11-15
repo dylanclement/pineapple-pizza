@@ -1,11 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace pineapple_pizza.Controllers
 {
+    public class Model 
+    {
+        public string imageFile;
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
@@ -26,8 +34,17 @@ namespace pineapple_pizza.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async void Post()
         {
+            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {  
+                var fileBase64 = await reader.ReadToEndAsync();
+                byte[] bytes = Convert.FromBase64String(fileBase64);
+
+                // TODO: Save to S3
+                System.IO.File.WriteAllBytes("test.jpg", bytes);
+            }
+
         }
 
         // PUT api/values/5
@@ -41,5 +58,7 @@ namespace pineapple_pizza.Controllers
         public void Delete(int id)
         {
         }
+
+
     }
 }

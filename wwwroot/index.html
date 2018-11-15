@@ -1,0 +1,47 @@
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+</head>
+<body>
+    <video id="player" controls autoplay></video>
+    <button id="capture">Capture</button>
+    <canvas id="canvas" width=320 height=240></canvas>
+    <script>
+        const player = document.getElementById('player');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const captureButton = document.getElementById('capture');
+      
+        const constraints = {
+          video: true,
+        };
+      
+        captureButton.addEventListener('click', () => {
+          // Draw the video frame to the canvas.
+          context.drawImage(player, 0, 0, canvas.width, canvas.height);
+          image = canvas.toDataURL("image/png");
+          image = image.replace('data:image/png;base64,', '');
+
+          $.ajax({
+                type: 'POST',
+                url: 'api/values',
+
+                data: image,
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                error: function(msg) {
+                    alert('Error saving image. ' + JSON.stringify(msg));
+                },
+                success: function(msg) {
+                    alert('Image saved successfully !');
+                }
+            });
+        });
+      
+        // Attach the video stream to the video element and autoplay.
+        navigator.mediaDevices.getUserMedia(constraints)
+          .then((stream) => {
+            player.srcObject = stream;
+          });
+      </script>
+</body>
+
