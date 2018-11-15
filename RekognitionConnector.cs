@@ -59,7 +59,7 @@ namespace PineapplePizza
             }
         }
 
-        public async Task FindFaceOrThrowException(string s3ObjectIdCard, string s3ObjectPhotoToTest, float similarityThreshold)
+        public async Task<float> FindFaceOrThrowException(string s3ObjectIdCard, string s3ObjectPhotoToTest, float similarityThreshold)
         {
             var imgSrc = GetImageDefinition(s3ObjectIdCard);
             var imgTrg = GetImageDefinition(s3ObjectPhotoToTest);
@@ -78,7 +78,7 @@ namespace PineapplePizza
                 // we are looking for two faces, the card and the actual picture taken by the person.
                 var matchesWeCareAbout = compareFacesResponse.FaceMatches.OrderByDescending(m => m.Similarity).Take(2);
 
-                if (matchesWeCareAbout.Count() < 2) throw new Exception("Not enough faces");
+                if (matchesWeCareAbout.Count() < 2) throw new Exception("Please ensure that both your card and your face can be seen");
 
                 // the card should be the smallest photo of the two with highest similarity
                 var shouldBeTheCardBySize = compareFacesResponse.FaceMatches.OrderBy(m => m.Face.BoundingBox.Height * m.Face.BoundingBox.Width).Take(1).Single();
@@ -88,13 +88,17 @@ namespace PineapplePizza
 
                 if (shouldBeTheCardBySimilarity != shouldBeTheCardBySize) throw new Exception("Faces don't match");
 
-                var match = shouldBeTheCardBySimilarity;
+                var shoultBeTheFaceOfThePerson = compareFacesResponse.FaceMatches.OrderBy(m => m.Similarity).Take(1).Single();
+
+                return shoultBeTheFaceOfThePerson.Similarity;
+
+                /*var match = shouldBeTheCardBySimilarity;
                 var face = match.Face;
                 var position = face.BoundingBox;
                 System.Diagnostics.Debug.WriteLine("Face at " + position.Left + " " + position.Top + " matches with " + face.Confidence + "% confidence.");
                 System.Diagnostics.Debug.WriteLine("There was " + compareFacesResponse.UnmatchedFaces.Count + " face(s) that did not match");
                 System.Diagnostics.Debug.WriteLine("Source image rotation: " + compareFacesResponse.SourceImageOrientationCorrection);
-                System.Diagnostics.Debug.WriteLine("Target image rotation: " + compareFacesResponse.TargetImageOrientationCorrection);
+                System.Diagnostics.Debug.WriteLine("Target image rotation: " + compareFacesResponse.TargetImageOrientationCorrection);*/
             }
             catch (Exception e)
             {
@@ -125,6 +129,8 @@ namespace PineapplePizza
                 }
 
                 var textWeCareAbout = detectTextResponse.TextDetections.Where(td => td.Confidence > 90);
+
+                if (textWeCareAbout.Count() < 2) throw new Exception("Please make your id card more visible");
 
                 var uniqueTexts = textWeCareAbout.Select(td => td.DetectedText).ToHashSet();
 

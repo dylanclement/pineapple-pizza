@@ -29,25 +29,51 @@ namespace PineapplePizza.Controllers
         [HttpPost]
         public async Task<IActionResult> Post()
         {
-            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
-            {  
-                // Fetch file content fomr base64 encoded body
-                var fileBase64 = await reader.ReadToEndAsync();
-                byte[] bytes = Convert.FromBase64String(fileBase64);
-
-                // Assign S3 object name and save to S3
-                var picName = Guid.NewGuid().ToString("D");
-                await _s3Connector.WriteObjectDataAsync(picName, bytes);
-
-                // Return the response to the UI
-                var response = new MatchResponse 
+            var matchConfidence = 0F;
+            MatchResponse response;
+            try
+            {
+                string testPhotoId;
+                using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
                 {
-                    // TODO! Fetch values from rekognition
+                    // Fetch file content fomr base64 encoded body
+                    var fileBase64 = await reader.ReadToEndAsync();
+                    byte[] bytes = Convert.FromBase64String(fileBase64);
+
+                    // Assign S3 object name and save to S3
+                    testPhotoId = Guid.NewGuid().ToString("D");
+                    await _s3Connector.WriteObjectDataAsync(testPhotoId, bytes);
+                }
+
+                const int minThresholdPercentage = 85;
+
+                //We extract the employee data from the id card
+                (int employeeNumber, string employeeNameWithoutSpaces) employeeData = await _rekognitionConnector.ExtractNameAndCodeInS3Object(testPhotoId);
+
+                var employee = await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId(employeeData.employeeNameWithoutSpaces, employeeData.employeeNumber));
+
+                if (employee == null) throw new Exception("Employee not found");
+
+                //we ensure that the faces are legit.
+                matchConfidence = await _rekognitionConnector.FindFaceOrThrowException(employee.ActiveIdCard.PictureObjectId, testPhotoId, minThresholdPercentage);
+
+                response = new MatchResponse
+                {
                     StatusCode = 200,
-                    MatchConfidence = 92.39f
+                    MatchConfidence = matchConfidence
                 };
-                return Ok(response);
             }
+            catch(Exception ex)
+            {
+                response = new MatchResponse
+                {
+                    StatusCode = 503,
+                    Message = ex.Message
+                };
+            }
+
+            // Return the response to the UI
+            return Ok(response);
         }
 
 
