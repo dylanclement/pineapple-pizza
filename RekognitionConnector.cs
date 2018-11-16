@@ -83,10 +83,9 @@ namespace PineapplePizza
                 // the card should be the smallest photo of the two with highest similarity
                 var shouldBeTheCardBySize = compareFacesResponse.FaceMatches.OrderBy(m => m.Face.BoundingBox.Height * m.Face.BoundingBox.Width).Take(1).Single();
 
-                // the card should also be the one with the highest similarity
-                var shouldBeTheCardBySimilarity = compareFacesResponse.FaceMatches.OrderByDescending(m => m.Similarity).Take(1).Single();
+                // the card similarity should be very high
 
-                if (shouldBeTheCardBySimilarity != shouldBeTheCardBySize) throw new Exception("Faces don't match");
+                if (shouldBeTheCardBySize.Similarity <= 95) throw new Exception("Is that your id card?");
 
                 var shoultBeTheFaceOfThePerson = compareFacesResponse.FaceMatches.OrderBy(m => m.Similarity).Take(1).Single();
 

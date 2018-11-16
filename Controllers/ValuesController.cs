@@ -41,7 +41,7 @@ namespace PineapplePizza.Controllers
                     byte[] bytes = Convert.FromBase64String(fileBase64);
 
                     // Assign S3 object name and save to S3
-                    testPhotoId = Guid.NewGuid().ToString("D");
+                    testPhotoId = $"tmp_{Guid.NewGuid().ToString("D")}";
                     await _s3Connector.WriteObjectDataAsync(testPhotoId, bytes);
                 }
 

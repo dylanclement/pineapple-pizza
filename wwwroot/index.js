@@ -34,18 +34,21 @@ captureButton.addEventListener('click', () => {
             resultDiv = document.getElementById('results')
             resultDiv.style.display = ''
 
+            var resultText = document.getElementById('result-text')
+            var resultMessage = document.getElementById('result-message')
+            var resultConfidence = document.getElementById('result-confidence')
+
             if (msg.statusCode == 200) {
-                var resultText = document.getElementById('result-text')
                 resultText.innerHTML = "Result: Success"
                 resultText.style = "color:green"
-                document.getElementById('result-confidence').innerHTML = "Confidence: " + msg.matchConfidence
+                resultConfidence.innerHTML = "Confidence: " + msg.matchConfidence
+                resultMessage.innerHTML = ""
             } else {
-                var resultText = document.getElementById('result-text')
                 resultText.innerHTML = "Result: Sorry"
                 resultText.style = "color:red"
             }
             if (msg.message !== null) {
-                document.getElementById('result-message').innerHTML = "Message: " + msg.message
+                resultMessage.innerHTML = "Message: " + msg.message
             }
             console.log('Image saved successfully !')
         }
