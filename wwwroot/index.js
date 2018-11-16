@@ -13,7 +13,12 @@ captureButton.addEventListener('click', () => {
     context.drawImage(player, 0, 0, 1280, 720);
     image = canvas.toDataURL("image/png");
     image = image.replace('data:image/png;base64,', '');
-    document.getElementById('results').style.display = 'none'
+
+    // Stop streaming the webcam
+    //player.srcObject = null;
+
+    // Set button
+    $('#capture').removeClass('btn-primary').addClass('btn-secondary').html("Processing...")
 
     $.ajax({
         type: 'POST',
@@ -30,9 +35,9 @@ captureButton.addEventListener('click', () => {
             }
         },
         success: function(msg) {
-            // Display results
-            resultDiv = document.getElementById('results')
-            resultDiv.style.display = ''
+            $('#capture').removeClass('btn-secondary').addClass('btn-primary').html('Go!')
+            // Display results modal
+            $('#myModal').modal()
 
             var resultText = document.getElementById('result-text')
             var resultMessage = document.getElementById('result-message')
@@ -44,12 +49,16 @@ captureButton.addEventListener('click', () => {
                 resultConfidence.innerHTML = "Confidence: " + msg.matchConfidence
                 resultMessage.innerHTML = ""
             } else {
-                resultText.innerHTML = "Result: Sorry"
+                resultText.innerHTML = "Result: Error"
                 resultText.style = "color:red"
             }
             if (msg.message !== null) {
-                resultMessage.innerHTML = "Message: " + msg.message
+                resultMessage.innerHTML = msg.message
             }
+            // navigator.mediaDevices.getUserMedia(constraints)
+            // .then((stream) => {
+            //     player.srcObject = stream;
+            // });
             console.log('Image saved successfully !')
         }
     });
