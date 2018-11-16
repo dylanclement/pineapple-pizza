@@ -5,16 +5,17 @@ const context = canvas.getContext('2d');
 const captureButton = document.getElementById('capture');
 
 const constraints = {
-video: true,
+    video: {width: {min: 1280}, height: {min: 720}}
 };
 
 captureButton.addEventListener('click', () => {
-// Draw the video frame to the canvas.
-context.drawImage(player, 0, 0, canvas.width, canvas.height);
-image = canvas.toDataURL("image/png");
-image = image.replace('data:image/png;base64,', '');
+    // Draw the video frame to the canvas.
+    context.drawImage(player, 0, 0, 1280, 720);
+    image = canvas.toDataURL("image/png");
+    image = image.replace('data:image/png;base64,', '');
+    document.getElementById('results').style.display = 'none'
 
-$.ajax({
+    $.ajax({
         type: 'POST',
         url: 'api/values',
 
@@ -37,15 +38,14 @@ $.ajax({
                 var resultText = document.getElementById('result-text')
                 resultText.innerHTML = "Result: Success"
                 resultText.style = "color:green"
+                document.getElementById('result-confidence').innerHTML = "Confidence: " + msg.matchConfidence
             } else {
                 var resultText = document.getElementById('result-text')
                 resultText.innerHTML = "Result: Sorry"
                 resultText.style = "color:red"
             }
-            document.getElementById('result-confidence').innerHTML = "Confidence: " + msg.matchConfidence
             if (msg.message !== null) {
                 document.getElementById('result-message').innerHTML = "Message: " + msg.message
-
             }
             console.log('Image saved successfully !')
         }

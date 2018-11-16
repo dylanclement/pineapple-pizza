@@ -37,7 +37,7 @@ namespace PineapplePizza
             var idDynamo = new EmployeeIdDynamo();
             idDynamo.FromPoco(id);
             var employee = await context.LoadAsync<EmployeeDynamo>(idDynamo.Value, _opConfig);
-            return employee.ToPoco();
+            return employee?.ToPoco();
         }
     }
 }

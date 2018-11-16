@@ -23,21 +23,20 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm">
-                    <video id="player" controls autoplay></video>
-                </div>
-                <div class="col-sm">
-                    <canvas id="canvas" width=640 height=480 style="width:640px;height:480px"></canvas>
-                    <div id="results" style="display:none">
-                        <h3 id="result-text"></h3>
-                        <h3 id="result-confidence"></h3>
-                        <h3 id="result-message"></h3>
-                    </div>
-                </div>
+                <video id="player" controls autoplay></video>
             </div>
             <div class="row">
                 <button id="capture" class="btn btn-primary">I'm ready</button>
             </div>
+            <div class="row">
+                <canvas id="canvas" width=1280 height=720 style="width:1280px;height:720px"></canvas>
+                <div id="results" style="display:none">
+                    <h3 id="result-text"></h3>
+                    <h3 id="result-confidence"></h3>
+                    <h3 id="result-message"></h3>
+                </div>
+            </div>
+            
         </div>
         
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
