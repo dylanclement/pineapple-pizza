@@ -55,7 +55,7 @@ namespace PineapplePizza.Controllers
                 if (employee == null) throw new Exception("Employee not found");
 
                 //we ensure that the faces are legit.
-                matchConfidence = await _rekognitionConnector.FindFaceOrThrowException(employee.ActiveIdCard.PictureObjectId, testPhotoId, minThresholdPercentage);
+                matchConfidence = await _rekognitionConnector.FindFaceOrThrowException(employee.ActiveIdCard.PictureObjectId, testPhotoId, minThresholdPercentage, employee.ActiveIdCard.Name);
 
                 response = new MatchResponse
                 {
@@ -92,7 +92,7 @@ namespace PineapplePizza.Controllers
             var employee = await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId(employeeData.employeeNameWithoutSpaces, employeeData.employeeNumber));
 
             //we ensure that the faces are legit.
-            await _rekognitionConnector.FindFaceOrThrowException(employee.ActiveIdCard.PictureObjectId, testPhotoId, minThresholdPercentage);
+            //await _rekognitionConnector.FindFaceOrThrowException(employee.ActiveIdCard.PictureObjectId, testPhotoId, minThresholdPercentage);
 
             return Ok(
                 //await _dynamoDBConnector.GetEmployeeAsync(new EmployeeId("BrunoTagliapietra", 9638)) + "\n" +

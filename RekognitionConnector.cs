@@ -59,7 +59,7 @@ namespace PineapplePizza
             }
         }
 
-        public async Task<float> FindFaceOrThrowException(string s3ObjectIdCard, string s3ObjectPhotoToTest, float similarityThreshold)
+        public async Task<float> FindFaceOrThrowException(string s3ObjectIdCard, string s3ObjectPhotoToTest, float similarityThreshold, string  personName)
         {
             var imgSrc = GetImageDefinition(s3ObjectIdCard);
             var imgTrg = GetImageDefinition(s3ObjectPhotoToTest);
@@ -78,7 +78,7 @@ namespace PineapplePizza
                 // we are looking for two faces, the card and the actual picture taken by the person.
                 var matchesWeCareAbout = compareFacesResponse.FaceMatches.OrderByDescending(m => m.Similarity).Take(2);
 
-                if (matchesWeCareAbout.Count() < 2) throw new Exception("Please ensure that both your card and your face can be seen");
+                if (matchesWeCareAbout.Count() < 2) throw new Exception(string.Format("You don't look like {0}.\nPlease ensure that both your card and your face can be seen.", personName));
 
                 // the card should be the smallest photo of the two with highest similarity
                 var shouldBeTheCardBySize = compareFacesResponse.FaceMatches.OrderBy(m => m.Face.BoundingBox.Height * m.Face.BoundingBox.Width).Take(1).Single();
