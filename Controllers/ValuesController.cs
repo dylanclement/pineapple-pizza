@@ -60,7 +60,8 @@ namespace PineapplePizza.Controllers
                 response = new MatchResponse
                 {
                     StatusCode = 200,
-                    MatchConfidence = matchConfidence
+                    MatchConfidence = matchConfidence,
+                    Message = "Welcome " + employee.ActiveIdCard.Name
                 };
             }
             catch(Exception ex)
