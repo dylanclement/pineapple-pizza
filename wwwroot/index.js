@@ -15,7 +15,7 @@ captureButton.addEventListener('click', () => {
     image = image.replace('data:image/png;base64,', '');
 
     // Stop streaming the webcam
-    //player.srcObject = null;
+    //player.srcObject.getTracks()[0].enabled = false;
 
     // Set button
     $('#capture').removeClass('btn-primary').addClass('btn-secondary').html("Processing...")
@@ -44,21 +44,18 @@ captureButton.addEventListener('click', () => {
             var resultConfidence = document.getElementById('result-confidence')
 
             if (msg.statusCode == 200) {
-                resultText.innerHTML = "Result: Success"
+                resultText.innerHTML = "Success"
                 resultText.style = "color:green"
                 resultConfidence.innerHTML = "Confidence: " + msg.matchConfidence
                 resultMessage.innerHTML = ""
             } else {
-                resultText.innerHTML = "Result: Error"
+                resultText.innerHTML = "Error"
                 resultText.style = "color:red"
             }
             if (msg.message !== null) {
                 resultMessage.innerHTML = msg.message
             }
-            // navigator.mediaDevices.getUserMedia(constraints)
-            // .then((stream) => {
-            //     player.srcObject = stream;
-            // });
+            //player.srcObject.getTracks()[0].enabled = true;
             console.log('Image saved successfully !')
         }
     });
